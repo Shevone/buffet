@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "LabWork27_buffet/1.0.0": {
+        "runtime": {
+          "LabWork27_buffet.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "LabWork27_buffet/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
