@@ -25,52 +25,49 @@ public class BaseService
             "Очистить столик", "Сменить работника, обслуживающего столик",
             "Посмотреть информацию об объектах"
         };
-        var index = _reader.SelectMenu(menuItems, "Главное меню");
-        
-        switch (index)
+       
+
+        while (true)
         {
-            case -1:
-                _reader.Message("Выбран выход");
-                break;
-            case 0:
-                // emp creating
-                var empName = _reader.GetStringFromConsole("Введите имя сотрудника");
-                var salary = _reader.GetIntFromConsole("Введите з/п сотрудника") ?? 0;
-                var employee = new Employee(empName, salary);
-                _buffet.AddNewPerson(employee);
-                break;
-            case 1 :
-                // visitor creating
-                var visName = _reader.GetStringFromConsole("Введите имя нового посетителя");
-                _buffet.AddNewPerson(new Visitor(visName));
-                break;
-            case 2:
-                // Создать столик
-                var empToTable = _reader.GetItemFromList(_buffet.Employees, "Выберете сотрудника для новго столика");
-                if (empToTable == null)
-                {
-                    _reader.Message("Не был выбран сотрудник");
+            var index = _reader.SelectMenu(menuItems, "Главное меню");
+            switch (index)
+            {
+                case -1:
+                    _reader.Message("Выбран выход");
                     return;
-                }
-                var table = new Table(empToTable);
-                _buffet.Tables.Add(table);
-                break;
-            case 3:
-                // осетители за столик
-                SitPersonsToTable();
-                break;
-            case 4:
-                MakeOrder();
-                break;
-            case 5:
-                ClearTable();
-                break;
-            case 6:
-                ChangeServiceManOfTable();
-                break;
-            case 7:
-                GetAllInfoAbout();
-                break;
+                case 0:
+                    // emp creating
+                    var empName = _reader.GetStringFromConsole("Введите имя сотрудника");
+                    var salary = _reader.GetIntFromConsole("Введите з/п сотрудника") ?? 0;
+                    var employee = new Employee(empName, salary);
+                    _buffet.AddNewPerson(employee);
+                    break;
+                case 1 :
+                    // visitor creating
+                    var visName = _reader.GetStringFromConsole("Введите имя нового посетителя");
+                    _buffet.AddNewPerson(new Visitor(visName));
+                    break;
+                case 2:
+                    // Создать столик
+                    AddTable();
+                    break;
+                case 3:
+                    // осетители за столик
+                    SitPersonsToTable();
+                    break;
+                case 4:
+                    MakeOrder();
+                    break;
+                case 5:
+                    ClearTable();
+                    break;
+                case 6:
+                    ChangeServiceManOfTable();
+                    break;
+                case 7:
+                    GetAllInfoAbout();
+                    break;
+            }
         }
     }
     
@@ -105,6 +102,7 @@ public class BaseService
     }
     private void SitPersonsToTable()
     {
+        if(_buffet.FreeVisitors.Count == 0) return;
         var visCount = _reader.GetIntFromConsole("ведите количество посетителей для добавления за стол");
         // Усадить людей за стол
         // Если количество людей введено не корректно, то меняем его
@@ -119,10 +117,11 @@ public class BaseService
         {
             var visitor = _reader.GetItemFromList(_buffet.FreeVisitors.ToList().Except(curVisitors).ToList(), "Выберете посетителя чтоб добавить к столику");
             if (visitor == default) break; // Если выбор отменяется, то просто сохраним как есть
-            visitor.IsGetTable = true;
             curVisitors.Add(visitor);
         }
-        var table = _reader.GetItemFromList(_buffet.FreeTables, "Выберете стоилк чтоб усадить туда посетителей");
+
+        var fT = _buffet.FreeTables;
+        var table = _reader.GetItemFromList(fT, "Выберете стоилк чтоб усадить туда посетителей");
         table?.SetVisitors(curVisitors);
     }
     // Очищаем стол
@@ -181,7 +180,7 @@ public class BaseService
                 sb.Append("Информация о столиках\n");
                 foreach (var table in _buffet.Tables)
                 {
-                    sb.Append($"\n{table}\n");
+                    sb.Append($"\n{table.Info()}\n");
                 }
                 _reader.Message(sb.ToString());
                 break;

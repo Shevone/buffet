@@ -6,8 +6,8 @@ public class Buffet
 {
    
     public  List<Table> Tables { get; }
-    public List<Table> BusyTables => Tables.Where(x => !x.IsBusy).ToList(); // занятые столики
-    public List<Table> FreeTables => Tables.Where(x => x.IsBusy).ToList(); // не занятые столики
+    public List<Table> BusyTables => Tables.Where(x => x.IsBusy).ToList(); // занятые столики
+    public List<Table> FreeTables => Tables.Where(x => !x.IsBusy).ToList(); // не занятые столики
     public List<Visitor> Visitors { get; }
     public List<Visitor> FreeVisitors => Visitors.Where(x => !x.IsGetTable).ToList();
     public List<Visitor> VisitorsOnTable => Visitors.Where(x => x.IsGetTable).ToList();

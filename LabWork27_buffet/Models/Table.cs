@@ -33,6 +33,7 @@ public class Table
         _order = new List<Product>();
         _visitors = new List<Visitor>();
         Id = SetNextId;
+        IsBusy = false;
     }
 
     public void ChangeServiceMan(Employee newServiceMan)
@@ -44,12 +45,20 @@ public class Table
     {
         IsBusy = false;
         _order.Clear();
+        foreach (var visitor in _visitors)
+        {
+            visitor.IsGetTable = false;
+        }
         _visitors.Clear();
     }
     public bool SetVisitors(List<Visitor> newVisitors)
     {
         if (IsBusy) return false;
         _visitors = newVisitors;
+        foreach (var visitor in newVisitors)
+        {
+            visitor.IsGetTable = true;
+        }
         IsBusy = true;
         return true;
     }
@@ -59,8 +68,13 @@ public class Table
         _order = prodToOrder;
         return true;
     }
-    
+
     public override string ToString()
+    {
+        return $"-{Id} - обслуживает {ServicePerson}";
+    }
+
+    public  string Info()
     {
         var sb = new StringBuilder($"Столик {Id}\nОбслуживающий : {ServicePerson}\nТекущий заказ\n");
         foreach (var product in _order)
