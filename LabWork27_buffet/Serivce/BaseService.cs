@@ -1,141 +1,217 @@
-﻿using LabWork27_buffet.Models;
+﻿using System.Text;
+using LabWork27_buffet.Models;
 using LabWork27_buffet.Models.Persons;
 
 namespace LabWork27_buffet.Serivce;
 
 public class BaseService
 {
-    private readonly List<Product> _products;
-    private readonly List<Table?> _tables;
-    private readonly List<Employee> _employees;
-    private readonly List<Visitor?> _visitors;
-
+    private readonly Buffet _buffet;
     private readonly IReader _reader;
     
 
-    public BaseService(IReader reader)
+    public BaseService(IReader reader, Buffet buffet)
     {
+        _buffet = buffet;
         _reader = reader;
-        _products = new List<Product>();
-        _tables = new List<Table?>();
-        _employees = new List<Employee>();
-        _visitors = new List<Visitor?>();
-        Start(5);
     }
-    // Создаем со старта 5 столов и одного сотрудника
-    private  void Start(int countTables)
-    {
-        var manager = new Employee("Сарший менеджер", 50000);
 
-        for (var i = 0; i < 5; i++)
+    public void Run()
+    {
+        var menuItems = new List<string>()
         {
-            _tables.Add(new Table(manager));
+            "Создать работника", "Создать посетителя", "Создать столик",
+            "Посадить посетителей за столик", "Сделать заказ на столик",
+            "Очистить столик", "Сменить работника, обслуживающего столик",
+            "Посмотреть информацию об объектах"
+        };
+        var index = _reader.SelectMenu(menuItems, "Главное меню");
+        
+        switch (index)
+        {
+            case -1:
+                _reader.Message("Выбран выход");
+                break;
+            case 0:
+                // emp creating
+                var empName = _reader.GetStringFromConsole("Введите имя сотрудника");
+                var salary = _reader.GetIntFromConsole("Введите з/п сотрудника") ?? 0;
+                var employee = new Employee(empName, salary);
+                _buffet.AddNewPerson(employee);
+                break;
+            case 1 :
+                // visitor creating
+                var visName = _reader.GetStringFromConsole("Введите имя нового посетителя");
+                _buffet.AddNewPerson(new Visitor(visName));
+                break;
+            case 2:
+                // Создать столик
+                var empToTable = _reader.GetItemFromList(_buffet.Employees, "Выберете сотрудника для новго столика");
+                if (empToTable == null)
+                {
+                    _reader.Message("Не был выбран сотрудник");
+                    return;
+                }
+                var table = new Table(empToTable);
+                _buffet.Tables.Add(table);
+                break;
+            case 3:
+                // осетители за столик
+                SitPersonsToTable();
+                break;
+            case 4:
+                MakeOrder();
+                break;
+            case 5:
+                ClearTable();
+                break;
+            case 6:
+                ChangeServiceManOfTable();
+                break;
+            case 7:
+                GetAllInfoAbout();
+                break;
         }
     }
+    
     // Поменять обслуживающего
-    public void ChangeServiceManOfTable()
+    private void ChangeServiceManOfTable()
     {
         // выбираем стол из всех не занятых столов
-        var table = _reader.GetItemFromList(_tables.Where(x => x?.IsBusy == false).ToList(), "Выберете стоилк для смены обслуживающего");
+        
+        var table = _reader.GetItemFromList(_buffet.FreeTables, "Выберете стоилк для смены обслуживающего");
         if (table == default)
         {
             return;
         }
         // Выбираем
-        var employee = _reader.GetItemFromList(_employees, "Выберете  для этого стола");
+        var employee = _reader.GetItemFromList(_buffet.Employees, "Выберете  для этого стола");
         if (employee == default)
         {
             return;
         }
         table.ChangeServiceMan(employee);
     }
-    // добавление созданного человека для взаимодействия
-    public void AddNewPerson(Peron newPerson)
-    {
-        Console.WriteLine(newPerson.Greetings());
-        // Добваляем в спиок по типу
-        switch (newPerson)
-        {
-            case Employee emp:
-                _employees.Add(emp);
-                return;
-            case Visitor visitor:
-                _visitors.Add(visitor);
-                return;
-            default:
-                return;
-        }
-    }
     // Добавить новое блюдо
-    public void AddNewProduct(Product newProduct)
-    {
-        _products.Add(newProduct);
-    }
     // Добавить стол
-    public void AddTable()
+    private void AddTable()
     {
         // Выбираем сотрудника чтоб приставтить его к этому столу
-        var employee = _reader.GetItemFromList(_employees, "Выберете сотрудника, который будет обслуживать данный стол");
+        var employee = _reader.GetItemFromList(_buffet.Employees, "Выберете сотрудника, который будет обслуживать данный стол");
         if (employee != null)
         {
-            _tables.Add(new Table(employee));
+             _buffet.Tables.Add(new Table(employee));
         }
     }
-    public void SitPersonsToTable(int visCount)
+    private void SitPersonsToTable()
     {
+        var visCount = _reader.GetIntFromConsole("ведите количество посетителей для добавления за стол");
         // Усадить людей за стол
         // Если количество людей введено не корректно, то меняем его
-        if (_visitors.Count < visCount)
+        if(visCount == null) return;
+        if (_buffet.Visitors.Count < visCount)
         {
-            visCount = _visitors.Count;
+            visCount = _buffet.Visitors.Count;
         }
         if (visCount <= 0) visCount = 1;
         var curVisitors = new List<Visitor>();
         for (int i = 0; i < visCount; i++)
         {
-            var visitor = _reader.GetItemFromList(_visitors.Where(x=>x?.IsGetTable == false).ToList(), "Выберете посетителя чтоб добавить к столику");
+            var visitor = _reader.GetItemFromList(_buffet.FreeVisitors.ToList().Except(curVisitors).ToList(), "Выберете посетителя чтоб добавить к столику");
             if (visitor == default) break; // Если выбор отменяется, то просто сохраним как есть
             visitor.IsGetTable = true;
             curVisitors.Add(visitor);
         }
-        var table = _reader.GetItemFromList(_tables.Where(x => x?.IsBusy == false).ToList(), "Выберете стоилк чтоб усадить туда посетителей");
+        var table = _reader.GetItemFromList(_buffet.FreeTables, "Выберете стоилк чтоб усадить туда посетителей");
         table?.SetVisitors(curVisitors);
     }
     // Очищаем стол
-    public void ClearTable()
+    private void ClearTable()
     {
-        var table = _reader.GetItemFromList(_tables.Where(x => x!.IsBusy).ToList(), "Выберете стол с которого уходят гости");
+        var table = _reader.GetItemFromList(_buffet.BusyTables, "Выберете стол с которого уходят гости");
         table?.ClearTheTable();
     }
     // Сделать заказ
-    public void MakeOrder(int countProduct)
+    private void MakeOrder()
     {
-        if (countProduct > _products.Count)
-        {
-            countProduct = _products.Count;
-        }
-        if (countProduct <= 0) countProduct = 1;
+        
+       
         // Выбираем столик чтоб принять закз
-        var table = _reader.GetItemFromList(_tables.Where(x => x?.IsBusy == true).ToList(), "Выберете стоилк для того чтобы принять заказ");
-        if (table == default)
+        var table = _reader.GetItemFromList(_buffet.BusyTables, "Выберете стоилк для того чтобы принять заказ");
+        if (table == null)
         {
             return;
         }
+        var countProduct = _reader.GetIntFromConsole("Введите число, сколько товаров хотите добавить в заказ");
+        if (countProduct > _buffet.Products.Count)
+        {
+            countProduct = _buffet.Products.Count;
+        }
+        if (countProduct <= 0) countProduct = 1;
         // Выбираем блюда для заказа
         var prodToOrder = new List<Product>();
         for (int i = 0; i < countProduct; i++)
         {
-            var product = _reader.GetItemFromList(_products.Except(prodToOrder).ToList(), "Выберете блюда для столика");
-            if (product == default) break;
+            var product = _reader.GetItemFromList(_buffet.Products, "Выберете блюда для столика");
+            if (product == null) break;
             prodToOrder.Add(product);
         }
         table.MakeOrder(prodToOrder);
     }
-    public void GetAllInfoAboutTables()
+    private void GetAllInfoAbout()
     {
-        foreach (var table in _tables)
+        var menuItems = new List<string>()
         {
-            Console.WriteLine(table);
+            "Столики", "Посетители", "Работники", "Блюда"
+        };
+        var index = _reader.SelectMenu(menuItems, "Выберете категорию для отображения информации об объектах");
+        if (index is < -1 or > 3)
+        {
+            index = -1;
+        }
+
+        var sb = new StringBuilder();
+        switch (index)
+        {
+            case -1:
+                _reader.Message("Ничего не выбрано");
+                break;
+            case 0:
+                // Tables info
+                sb.Append("Информация о столиках\n");
+                foreach (var table in _buffet.Tables)
+                {
+                    sb.Append($"\n{table}\n");
+                }
+                _reader.Message(sb.ToString());
+                break;
+            case 1:
+                // VisitorsInfo
+                sb.Append("Информация о посетителях\n");
+                foreach (var visitor in _buffet.Visitors)
+                {
+                    sb.Append($"\n{visitor.GetInfo()}\n");
+                }
+                _reader.Message(sb.ToString());
+                break;
+            case 2:
+                // Employee info
+                sb.Append("Информация о сотрудниках\n");
+                foreach (var employee in _buffet.Employees)
+                {
+                    sb.Append($"\n{employee.GetInfo()}\n");
+                }
+                _reader.Message(sb.ToString());
+                break;
+            case 3:
+                // Prod info
+                sb.Append("Информация о блюдах\n");
+                foreach (var product in _buffet.Products)
+                {
+                    sb.Append($"\n{product}\n");
+                }
+                _reader.Message(sb.ToString());
+                break;
         }
     }
 }

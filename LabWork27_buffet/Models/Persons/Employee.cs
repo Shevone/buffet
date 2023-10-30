@@ -1,6 +1,6 @@
 ﻿namespace LabWork27_buffet.Models.Persons;
 
-public class Employee : Peron
+public class Employee : Person
 {
     public Employee(string name, int salary) : base(name)
     {
@@ -20,11 +20,10 @@ public class Employee : Peron
         NumberOfTableServed++;
     }
 
-    public override string ToString()
+    public override string GetInfo()
     {
         return $"Работник {Name}, Зарплату {Salary}, Количество обслуженных столов за смену {NumberOfTableServed}";
     }
-
     public override string Greetings()
     {
         return $"Здравствуйте, меня зовут {Name}. Добро пожаловать в наш ресторан.";

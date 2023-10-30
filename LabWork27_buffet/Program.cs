@@ -8,54 +8,41 @@ public static class Program
 {
     public static void Main(string[] args)
     {
-        var consoleReaderService = new ConsoleReader();
-        var service = new BaseService(consoleReaderService);
+        
         
         // Создадим Работников
-        service.AddNewPerson(new Employee("Вася", 18000));
-        service.AddNewPerson(new Employee("Иван", 18000));
-        service.AddNewPerson(new Employee("Петр", 21000));
-        service.AddNewPerson(new Employee("Стажер Егор", 15000));
-        service.ChangeServiceManOfTable();
-        service.GetAllInfoAboutTables();
-       
+        var buffet = new Buffet(5);
+        var emp1 = new Employee("Вася", 18000);
+        var emp2 = new Employee("Иван", 18000);
+        var emp3 = new Employee("Петр", 21000);
+        var emp4 = new Employee("Стажер Егор", 15000);
+        buffet.Employees.AddRange(
+            new List<Employee>() { emp1, emp2,emp3,emp4 }
+            );
         //Создадим Посетителей
-        service.AddNewPerson(new Visitor("Игор Николаевич"));
-        service.AddNewPerson(new Visitor("Георгий Петрович"));
-        service.AddNewPerson(new Visitor("Николай Дмитриевич"));
-        service.AddNewPerson(new Visitor("Данил Юрьевич"));
-        service.AddNewPerson(new Visitor("Василия Николаевна"));
-        service.AddNewPerson(new Visitor("Виктория Олеговна"));
-        // Создадим блюда
-        service.AddNewProduct(new Product(321.2, "Селедка под шубой"));
-        service.AddNewProduct(new Product(32.2, "Картошка"));
-        service.AddNewProduct(new Product(400.2, "Шашлык"));
-        service.AddNewProduct(new Product(1.2, "Салат Цезарь"));
-        service.AddNewProduct(new Product(10.2, "Десерт  сладкий"));
-        // Усадим 2х и сделаем заказ
-        service.SitPersonsToTable(2);
-        service.MakeOrder(2);
-        // Усадим еще двух и сделаем заказ
-        service.SitPersonsToTable(2);
-        // Протестируем корректность работы при таких значениях
-        service.MakeOrder(7);
-        
-        // выведем всю инфу
-        service.GetAllInfoAboutTables();
-        // Освободим один стол
-        service.ClearTable();
-        // Усадим еще людей и сделаем закза
-        service.SitPersonsToTable(2);
-        service.MakeOrder(-1);
-        // Опять усдаим людей
-        service.SitPersonsToTable(2);
-        service.SitPersonsToTable(2);
-        // Добавил стол
-        service.AddTable();
-        service.ClearTable();
-        service.ClearTable();
-        service.ClearTable();
-        service.GetAllInfoAboutTables();
+        var vis1 = new Visitor("Игор Николаевич");
+        var vis2 = new Visitor("Георгий Петрович");
+        var vis3 = new Visitor("Николай Дмитриевич");
+        var vis4 = new Visitor("Данил Юрьевич");
+        var vis5 = new Visitor("Василия Николаевна");
+        var vis6 = new Visitor("Виктория Олеговна");
+        buffet.Visitors.AddRange(new List<Visitor>()
+        {
+            vis1,vis2,vis3,vis4,vis5,vis6
+        });
+        var prod1 = new Product(321.2, "Селедка под шубой");
+        var prod2 = new Product(32.2, "Картошка");
+        var prod3 = new Product(400.2, "Шашлык");
+        var prod4 = new Product(1.2, "Салат Цезарь");
+        var prod5 = new Product(10.2, "Десерт  сладкий");
+           // Создадим блюда
+        buffet.Products.AddRange(new List<Product>()
+        {
+            prod1,prod2,prod3,prod4,prod5
+        });
+        var consoleReaderService = new ConsoleReader();
+        var service = new BaseService(consoleReaderService,buffet);
+        service.Run();
     }
 
     

@@ -2,6 +2,30 @@
 
 public class ConsoleReader : IReader
 {
+    public int? GetIntFromConsole(string message)
+    {
+        Console.WriteLine(message);
+        if(int.TryParse(Console.ReadLine() ?? "0", out var intRes));
+        {
+            return intRes;
+        }
+        return null;
+
+    }
+
+    public string GetStringFromConsole(string message)
+    {
+        Console.WriteLine(message);
+        var readString = Console.ReadLine() ?? "";
+        return readString;
+    }
+
+    public void Message(string message)
+    {
+        Console.WriteLine(message);
+        Console.WriteLine("Нажмите любую клавишу чтобы продолжить");
+        Console.ReadKey();
+    }
     public T? GetItemFromList<T>(List<T?> list, string message = "")
     {
         var r = SelectMenu(list, message);
@@ -12,7 +36,7 @@ public class ConsoleReader : IReader
         Console.Clear();
         return list[r];
     }
-    private int SelectMenu<T>(List<T> menuItems, string mes = "")
+    public int SelectMenu<T>(List<T> menuItems, string mes = "")
     {
         // Метод для того чтобы представить коллекцию в виде свич меню в консоли
         // Возвращает порядковый номер в списке выбранного элемента
@@ -52,12 +76,8 @@ public class ConsoleReader : IReader
                     {
                         case 0:
                             if (menuItems[0].ToString() != "Выход") return 0;
-                            Console.WriteLine("Выбран выход");
                             return -1;
                         default:
-                            
-                            Console.WriteLine($"Выбран пункт {menuItems[index]}");
-                            
                             return index;
                             
                     }
