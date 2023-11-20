@@ -1,42 +1,32 @@
 ﻿namespace LabWork27_buffet.Serivce;
 
-public class ConsoleReader : IReader
+public class ConsoleReader
 {
-    public int? GetIntFromConsole(string message)
+    public void ReadKey(string message)
     {
         Console.WriteLine(message);
-        if(int.TryParse(Console.ReadLine() ?? "0", out var intRes));
-        {
-            return intRes;
-        }
-        return null;
-
-    }
-
-    public string GetStringFromConsole(string message)
-    {
-        Console.WriteLine(message);
-        var readString = Console.ReadLine() ?? "";
-        return readString;
-    }
-
-    public void Message(string message)
-    {
-        Console.WriteLine(message);
-        Console.WriteLine("Нажмите любую клавишу чтобы продолжить");
+        Console.WriteLine("\nНажмите любую клавишу чтоб продолжить");
         Console.ReadKey();
     }
-    public T? GetItemFromList<T>(List<T?> list, string message = "")
+    public string StringFromConsole(string message)
     {
-        var r = SelectMenu(list, message);
-        if (r == -1)
-        {
-            return default;
-        }
-        Console.Clear();
-        return list[r];
+        Console.WriteLine(message);
+        var readLine = Console.ReadLine() ?? "";
+        return readLine;
     }
-    public int SelectMenu<T>(List<T> menuItems, string mes = "")
+
+    public int PositiveIntFromConsole(string message)
+    {
+        Console.WriteLine(message);
+        var readLine = Console.ReadLine() ?? "-1";
+        if (int.TryParse(readLine, out int result))
+        {
+            return result;
+        }
+        return -1;
+    }
+
+    public int SelectMenu<T>(IReadOnlyList<T> menuItems, string mes = "")
     {
         // Метод для того чтобы представить коллекцию в виде свич меню в консоли
         // Возвращает порядковый номер в списке выбранного элемента
@@ -70,22 +60,26 @@ public class ConsoleReader : IReader
                         index--;
                     break;
                 case ConsoleKey.Backspace:
+                    Console.Clear();
                     return -1;
                 case ConsoleKey.Enter:
                     switch (index)
                     {
                         case 0:
                             if (menuItems[0].ToString() != "Выход") return 0;
+                            Console.Clear();
                             return -1;
                         default:
+                            Console.Clear();
                             return index;
                             
                     }
             }
         }
     }
-    private static void DrawMenu<T>(List<T> items, int row, int col, int index)
+    private static void DrawMenu<T>(IReadOnlyList<T> items, int row, int col, int index)
     {
+        Console.Clear();
         Console.SetCursorPosition(col, row);
         for (int i = 0; i < items.Count; i++)
         {

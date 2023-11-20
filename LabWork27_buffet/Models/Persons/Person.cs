@@ -2,17 +2,13 @@
 
 public abstract class Person
 {
+    private PasportData _pasportData;
     protected Person(string name)
     {
-        Name = name;
+        _pasportData = new PasportData(name);
     }
-    public string Name { get; }
+
+    public string Name => _pasportData.Name;
 
     public abstract string Greetings();
-    public abstract string GetInfo();
-    
-    public override string ToString()
-    {
-        return $"{Name}";
-    }
 }

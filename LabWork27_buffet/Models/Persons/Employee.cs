@@ -20,10 +20,11 @@ public class Employee : Person
         NumberOfTableServed++;
     }
 
-    public override string GetInfo()
+    public override string ToString()
     {
         return $"Работник {Name}, Зарплату {Salary}, Количество обслуженных столов за смену {NumberOfTableServed}";
     }
+
     public override string Greetings()
     {
         return $"Здравствуйте, меня зовут {Name}. Добро пожаловать в наш ресторан.";

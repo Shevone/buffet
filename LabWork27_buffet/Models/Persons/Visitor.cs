@@ -7,10 +7,11 @@ public class Visitor : Person
         IsGetTable = false;
     }
     public bool IsGetTable { get; set; }
-    public override string GetInfo()
+    public override string ToString()
     {
         return $"Посетитель {Name}, Cидит ли за столиком {IsGetTable}";
     }
+
     public override string Greetings()
     {
         return $"Здравствуйте, у вас есть свободные столики....";
