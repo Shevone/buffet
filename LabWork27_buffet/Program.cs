@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
+using LabWork27_buffet.Lab2;
 using LabWork27_buffet.Models;
 using LabWork27_buffet.Models.Persons;
 using LabWork27_buffet.Serivce;
@@ -22,12 +24,12 @@ public static class Program
 
     private static List<string> _empMenuItems = new List<string>()
     {
-        "Выход", "Добавить сотрудника", "Сменить сотрудника за столом", "Просмотр информации о сотрудниках"
+        "Выход", "Добавить сотрудника", "Сменить сотрудника за столом", "Просмотр информации о сотрудниках", "Сортировка по паспортным данным", "Сортировка по зп(возрастание)", "Сортировка по зп(убывание)"
     };
 
     private static List<string> _visMenuItems = new List<string>()
     {
-        "Выход", "Новый посетитель", "Посадить посетителя за стол", "Информация о постетителях"
+        "Выход", "Новый посетитель", "Посадить посетителя за стол", "Информация о постетителях", "Сортировка по паспортным данным", "Сортировка по по посадке(возрастание)", "Сортировка по посадке(убывание)"
     };
 
     private static List<string> _infoMenuItems = new List<string>()
@@ -136,8 +138,8 @@ public static class Program
                     break;
                 }
                 Visitor newVisitor = new Visitor(visName);
-                Service.AddNewPerson(newVisitor);
-                sb.Append("посетитель добавлен");
+                string gr = Service.AddNewPerson(newVisitor);
+                sb.Append($"посетитель добавлен\n{gr}");
                 break;
             case 2:
                 var mes = PersonOnTable();
@@ -146,6 +148,21 @@ public static class Program
             case 3:
                 sb.Append(VisitorsInfo(sb));
                 break;
+            case 4:
+                // Сортировка по пд
+                Service.SortVis(1);
+                sb.Append("Произведена сортировка посетителей по паспортным данным");
+                break;
+            case 5:
+                Service.SortVis(2);
+                sb.Append("Произведена сортировка посетителей по посадке (возрастание)");
+                // Сортировка по посадке
+                break;
+            case 6:
+                // Сортировка по посадке
+                sb.Append("Произведена сортировка посетителей по посадке (убыванеи)");
+                Service.SortVis(3);
+                break;
             
         }
         return sb.ToString();
@@ -153,7 +170,7 @@ public static class Program
 
     private static string VisitorsInfo(StringBuilder sb)
     {
-        sb.Append("Просмотр информации о посетителях");
+        sb.Append("Просмотр информации о посетителях\n");
         foreach (var visitor in Service.Visitors)
         {
             sb.Append(visitor + "\n");
@@ -180,8 +197,8 @@ public static class Program
                     break;
                 }
                 Employee newEmp = new Employee(empName,empSalary);
-                Service.AddNewPerson(newEmp);
-                sb.Append($"Создан новый сотрудник {newEmp}");
+                string gr = Service.AddNewPerson(newEmp);
+                sb.Append($"Создан новый сотрудник {newEmp}\n{gr}");
                 break;
             case 2:
                 sb.Append(ChangeTableEmp());
@@ -189,13 +206,25 @@ public static class Program
             case 3:
                 sb.Append(EmployeInfo(sb));
                 break;
+            case 4:
+                Service.SortEmp(1);
+                sb.Append("Произведена сортировка сотрудников по пампортным данным");
+                break;
+            case 5:
+                Service.SortEmp(2);
+                sb.Append("Произведена сортировка сотрудников по возрастанию зп");
+                break;
+            case 6:
+                Service.SortEmp(3);
+                sb.Append("Произведена сортировка сотрудников по убыванию зп ");
+                break;
         }
         return sb.ToString();
     }
 
     private static string EmployeInfo(StringBuilder sb)
     {
-        sb.Append("Просмотр информации о сотрудниках");
+        sb.Append("Просмотр информации о сотрудниках\n");
         foreach (var employee in Service.Employees)
         {
             sb.Append(employee + "\n");
@@ -376,5 +405,68 @@ public static class Program
         service.AddNewProduct(prod3);
         service.AddNewProduct(prod4);
         service.AddNewProduct(prod5);
+    }
+
+
+    public static void CovarianceShow()
+    {
+        // Мы создаем как бы под типом для посетителей, но при под обобщенным типом
+        IPersons<Person> company = new Visitors();
+        Person personFromCompany = new Visitor("Вася");
+        Console.WriteLine(personFromCompany.Greetings());
+
+        IPersons<Employee> emPersons = new Employees();
+        emPersons.NewPerson("Артур");
+        Employee? emp = emPersons.GetPersonByNam("Артур");
+        emp.Salary = 20000;
+        IPersons<Person> emPersons2 = emPersons;
+        Person? person = emPersons2.GetPersonByNam("Артур");
+        Console.WriteLine(person.DisplayInfo());
+        // То есть мы можем присвоить более общему типу IPersons<Person>
+        // объект более конкретного типа Employees или IPersons<Employee>
+    }
+}
+
+
+public interface IPersons<out T>
+{
+    T NewPerson(string name);
+    T? GetPersonByNam(string name);
+}
+
+public class Visitors : IPersons<Visitor>
+{
+    // Класс - список посетителей
+    private List<Visitor> _visitors = new List<Visitor>();
+    // Метод который создает нового посетителя и возвращает его
+    public Visitor NewPerson(string name)
+    {
+        Visitor visitor = new Visitor(name);
+        _visitors.Add(visitor);
+        return visitor;
+    }
+
+    public Visitor? GetPersonByNam(string name)
+    {
+        // ? - null-able
+        return _visitors.Find(x => x.Name == name);
+    }
+}
+
+public class Employees : IPersons<Employee>
+{
+    private List<Employee> _employees = new List<Employee>();
+
+    public Employee NewPerson(string name)
+    {
+        // Создаем сотрудника с базовой зп потом можно поднять если че
+        Employee employee = new Employee(name, 15000);
+        _employees.Add(employee);
+        return employee;
+    }
+
+    public Employee? GetPersonByNam(string name)
+    {
+        return _employees.Find(x => x.Name == name);
     }
 }

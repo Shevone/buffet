@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using LabWork27_buffet.Lab2;
 using LabWork27_buffet.Models;
 using LabWork27_buffet.Models.Persons;
 
@@ -6,27 +7,27 @@ namespace LabWork27_buffet.Serivce;
 
 public class Buffet
 {
-    private readonly List<Product> _products;
-    private readonly List<Table> _tables;
-    private readonly List<Employee> _employees;
-    private readonly List<Visitor> _visitors;
-    private readonly List<Order> _orders;
-    public IReadOnlyList<Order> Orders => _orders;
-    public IReadOnlyList<Product> Products => _products;
-    public IReadOnlyList<Table> Tables => _tables;
-    public IReadOnlyList<Employee> Employees => _employees;
-    public IReadOnlyList<Visitor> Visitors => _visitors; 
+    private  List<Product> _products;
+    private  List<Table> _tables;
+    private  PersonCollection<Employee> _employees;
+    private  PersonCollection<Visitor> _visitors;
+    private  List<Order> _orders;
+    public List<Order> Orders => _orders;
+    public List<Product> Products => _products;
+    public List<Table> Tables => _tables;
+    public List<Employee> Employees => new (_employees);
+    public List<Visitor> Visitors => new (_visitors); 
 
-    public IReadOnlyList<Table> FreeTables => _tables.Where(x => !x.IsBusy).ToList();
-    public IReadOnlyList<Table> ReservedTables => _tables.Where(x => x.IsBusy).ToList();
+    public List<Table> FreeTables => _tables.Where(x => !x.IsBusy).ToList();
+    public List<Table> ReservedTables => _tables.Where(x => x.IsBusy).ToList();
     
-    public IReadOnlyList<Visitor> FreePersons => _visitors.Where(x => x?.IsGetTable == false).ToList();
+    public List<Visitor> FreePersons => _visitors.Where(x => x?.IsGetTable == false).ToList();
     public Buffet()
     {
         _products = new List<Product>();
         _tables = new List<Table>();
-        _employees = new List<Employee>();
-        _visitors = new List<Visitor>();
+        _employees = new PersonCollection<Employee>();
+        _visitors = new PersonCollection<Visitor>();
         _orders = new List<Order>();
         Initialize(5);
     }
@@ -80,5 +81,45 @@ public class Buffet
         }
 
         return sb.ToString();
+   }
+   // =======================================================================================================
+   // Сортировка
+   public void SortVis(int index)
+   {
+       // Из вне получаем индек и сортируем по выбранному методу
+       switch (index)
+       {
+           case 1:
+               // Паспортные данные
+               _visitors.SortPersons(Person.CompareByPassportData);
+                break;
+           case 2:
+               // Посадка возрастание
+               _visitors.SortPersons(Visitor.CompreIsSiting);
+                break;
+           case 3:
+               // Посадка убывание
+               _visitors.SortPersons(Visitor.CompreIsNotSiting);
+                break;
+       }
+   }
+   public void SortEmp(int index)
+   {
+       // Из вне получаем индек и сортируем по выбранному методу
+       switch (index)
+       {
+           case 1:
+               // Паспортные данные
+               _employees.SortPersons(Person.CompareByPassportData);
+               break;
+           case 2:
+               // ЗП возрастание
+               _employees.SortPersons(Employee.CompareByHighestSalary);
+               break;
+           case 3:
+               // ЗП убывание
+               _employees.SortPersons(Employee.CompareByLowestSalary);
+               break;
+       }
    }
 }

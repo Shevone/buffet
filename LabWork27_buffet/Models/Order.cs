@@ -5,7 +5,7 @@ namespace LabWork27_buffet.Models;
 public class Order
 {
     public int Id { get;  }
-    private readonly Dictionary<Product,int> _products = new ();
+    private Dictionary<Product,int> _products = new ();
     public IReadOnlyList<Product> Products => _products.Keys.ToList();
     private static int _id = 1;
     public Order()

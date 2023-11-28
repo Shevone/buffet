@@ -7,9 +7,11 @@ public class Product
         Calories = calories;
         DishName = dishName;
     }
-    public string DishName { get;}
-    private readonly double _calories;
-    public double Calories
+
+    private string DishName { get;}
+    private double _calories;
+
+    private double Calories
     {
         get => _calories;
         init => _calories = value > 0 ? value : 0.1;
